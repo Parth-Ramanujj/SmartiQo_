@@ -1,7 +1,64 @@
 <!DOCTYPE html>
 <html lang="en" style="--nav-logo-scale: 1;">
 
-<head>
+<head>\n
+<script id="sc-early-hydrate">
+  // SWITCHCRAFT: Early Hydration for Cart Editing
+  (function() {
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const cartParamId = urlParams.get('cart');
+      if (!cartParamId) return;
+      
+      let item = null;
+      let allItems = [];
+      
+      const possibleKeys = ['persist:root'];
+      for (const k of possibleKeys) {
+        const raw = localStorage.getItem(k);
+        if (!raw) continue;
+        try {
+            const parsed = JSON.parse(raw);
+            if (parsed.cartData) {
+              const cd = typeof parsed.cartData === 'string' ? JSON.parse(parsed.cartData) : parsed.cartData;
+              if (cd.cartItems && cd.cartItems.length > 0) { allItems = cd.cartItems; break; }
+            }
+            if (parsed.cartItems && parsed.cartItems.length > 0) { allItems = parsed.cartItems; break; }
+        } catch(e){}
+      }
+      item = allItems.find(i => i.id === cartParamId || i.productSequence === cartParamId);
+    
+    // Fallbacks for Dashboard Edit
+    if (!item && cartParamId) {
+        try {
+            let localOrders = JSON.parse(localStorage.getItem('sc_local_orders') || '[]');
+            let match = localOrders.find(i => i.payload && (i.payload.orderId === cartParamId));
+            if (match && match.rawCartData) {
+                item = {
+                    cartData: match.rawCartData,
+                    dropped: match.rawDropped || []
+                };
+            }
+        } catch(e){}
+    }
+
+      if (item) {
+        const persistStr = localStorage.getItem('persist:root');
+        if (persistStr) {
+           const persist = JSON.parse(persistStr);
+           let cartDataState = persist.cartData ? JSON.parse(persist.cartData) : {};
+           cartDataState.cartData = item.cartData || item.rawCartData || item;
+           persist.cartData = JSON.stringify(cartDataState);
+           localStorage.setItem('persist:root', JSON.stringify(persist));
+           console.log('[Early Hydrate] Injected cart item', cartParamId, 'into persist:root');
+        }
+      }
+    } catch (e) {
+      console.error('[Early Hydrate Error]', e);
+    }
+  })();
+</script>
+
     <script src="/early-hydrate.js"></script>
     <base href="/">
     <style data-emotion="mui-global" data-s=""></style>
