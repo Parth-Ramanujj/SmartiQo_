@@ -69,10 +69,10 @@ class handler(BaseHTTPRequestHandler):
                 session_data = {
                     "user": {
                         "id": "user1",
-                        "name": "Demo User",
+                        "name": "Admin User",
                         "email": os.environ.get("AUTH_USERNAME", "info@smartiqo.com"),
-                        "role": "user",
-                        "isPremium": False,
+                        "role": "admin",
+                        "isPremium": True,
                         "parentUserId": None,
                     },
                     "expires": "2036-07-09T20:20:13.000Z",
