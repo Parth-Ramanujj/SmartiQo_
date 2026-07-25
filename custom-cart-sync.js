@@ -1120,46 +1120,20 @@ setInterval(restoreCartFromUrl, 500);
 
 
   // Intercept Next.js navigation for Cart Editing to force a hard reload
+    // Intercept Next.js navigation for Cart Editing to force a hard reload to ROOT
   document.addEventListener('click', function(e) {
       const link = e.target.closest('a');
       if (link && link.href) {
-          const url = new URL(link.href);
+          const url = new URL(link.href, window.location.origin);
           if (url.searchParams.has('cart')) {
-              // Find the edit ID
+              e.preventDefault();
+              e.stopPropagation();
               const cartId = url.searchParams.get('cart');
               localStorage.setItem('sc_editing_item_id', cartId);
-              
-              // Dispatch to Redux immediately to preserve state across SPA navigation!
-              let item = null;
-              try {
-                  const localOrders = JSON.parse(localStorage.getItem('sc_local_orders') || '[]');
-                  const match = localOrders.find(i => i.payload && (i.payload.orderId === cartId));
-                  if (match && match.rawCartData) {
-                      item = { cartData: match.rawCartData, dropped: match.rawDropped || [] };
-                  }
-              } catch(e){}
-              
-              if (!item) {
-                  try {
-                      if (window.__store) {
-                          const state = window.__store.getState();
-                          const cartItems = state.cartData.cartItems || [];
-                          item = cartItems.find(i => i.id === cartId || i.productSequence === cartId);
-                      }
-                  } catch(e){}
-              }
-              
-              if (item && window.__store) {
-                  window.__store.dispatch({
-                      type: 'cartData/setCartFromOrder',
-                      payload: { cart: item.cartData || item.rawCartData, dropped: item.dropped || item.rawDropped || [] }
-                  });
-              }
-              // Allow Next.js SPA router to handle the navigation normally!
+              window.location.href = '/?cart=' + cartId;
           }
       }
-  }, true); // Use capture phase to intercept before Next.js
-
+  }, true);
 
 // Intercept Next.js router.push via history.pushState
 const originalPushState = window.history.pushState;
@@ -1170,33 +1144,8 @@ window.history.pushState = function(state, unused, url) {
             if (parsedUrl.searchParams.has('cart')) {
                 const cartId = parsedUrl.searchParams.get('cart');
                 localStorage.setItem('sc_editing_item_id', cartId);
-                
-                let item = null;
-                try {
-                    const localOrders = JSON.parse(localStorage.getItem('sc_local_orders') || '[]');
-                    const match = localOrders.find(i => i.payload && (i.payload.orderId === cartId));
-                    if (match && match.rawCartData) {
-                        item = { cartData: match.rawCartData, dropped: match.rawDropped || [] };
-                    }
-                } catch(e){}
-                
-                if (!item) {
-                    try {
-                        if (window.__store) {
-                            const state = window.__store.getState();
-                            const cartItems = state.cartData.cartItems || [];
-                            item = cartItems.find(i => i.id === cartId || i.productSequence === cartId);
-                        }
-                    } catch(e){}
-                }
-                
-                if (item && window.__store) {
-                    window.__store.dispatch({
-                        type: 'cartData/setCartFromOrder',
-                        payload: { cart: item.cartData || item.rawCartData, dropped: item.dropped || item.rawDropped || [] }
-                    });
-                    console.log('[CartSync] Dispatched setCartFromOrder for', cartId);
-                }
+                window.location.href = '/?cart=' + cartId;
+                return; // abort SPA pushState
             }
         } catch (e) {
             console.error('[CartSync] Error intercepting pushState:', e);
