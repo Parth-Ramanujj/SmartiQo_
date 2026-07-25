@@ -955,7 +955,7 @@ class CORSHandler(SimpleHTTPRequestHandler):
                     self.end_headers()
                     return
             else:
-                if not is_auth and path_lower != "/admin":
+                if not is_auth and not path_lower.startswith("/admin"):
                     self.send_response(302)
                     self.send_header("Location", "/Login")
                     self.end_headers()

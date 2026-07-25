@@ -14,6 +14,8 @@
     },
     { "source": "/api/auth/:path*", "destination": "/api/auth.py" },
     { "source": "/api/:path*", "destination": "/api/fallback.py" },
+    { "source": "/admin", "destination": "/admin.html" },
+    { "source": "/admin/:path*", "destination": "/admin.html" },
     { "source": "/Login", "destination": "/pages/vdplshop.in_Login.html" },
     { "source": "/Dashboards/userDashboard", "destination": "/pages/vdplshop.in_Dashboards_userDashboard.html" },
     { "source": "/Dashboards/adminDashboard", "destination": "/pages/vdplshop.in_Dashboards_adminDashboard.html" },
