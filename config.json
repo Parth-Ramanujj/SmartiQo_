@@ -1,0 +1,5 @@
+{
+  "port": 8080,
+  "host": "0.0.0.0",
+  "googleSheetUrl": "https://script.google.com/macros/s/AKfycbxuKRqFQusxgNGYrbLwQ6ctNPnIAvDYkZngP7NK0XUIN99lEUhf6pxjPJf2EJAnZNn9/exec"
+}
